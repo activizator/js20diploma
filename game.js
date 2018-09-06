@@ -62,8 +62,8 @@ class Actor {
 
 class Level {
   constructor(grid = [], actors = []) {
-    this.actors = actors.slice();
-    this.grid = grid.slice();
+    this.actors = actors;
+    this.grid = grid;
     this.height = this.grid.length;
     let width = Math.max.apply(null, this.grid.map((row) => {
       return row.length;
