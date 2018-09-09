@@ -65,9 +65,13 @@ class Level {
     this.actors = actors;
     this.grid = grid;
     this.height = this.grid.length;
+    // apply можно заменить на простой вызов функции с помощью средств ES6
     let width = Math.max.apply(null, this.grid.map((row) => {
       return row.length;
     }));
+    // эту проверку можно будет убрать, если добавить 0
+    // в список аргументов Math.max
+    // (чтобы функция не возвращала -Infinity для пустого массива)
     0 >= width ? this.width = 0 : this.width = width;
     this.status = null;
     this.finishDelay = 1;
@@ -112,6 +116,8 @@ class Level {
     }
   }
   noMoreActors(type) {
+    // здесь лучше использоваь другой метод массива,
+    // который проверяет наличие элементов, удовлетворяющих условию
     return this.actors.findIndex(act => act.type === type) < 0 ? true : false;
   }
   playerTouched(touchedEl, actor) {
@@ -119,6 +125,8 @@ class Level {
       return;
     }
     if (touchedEl === 'lava' || touchedEl === 'fireball') {
+      // лучше сделать 2 строчки, чтобы было видно,
+      // что метод не возвращает ничего
       return this.status = 'lost';
     } 
     if (touchedEl === 'coin') {
@@ -146,9 +154,12 @@ class LevelParser {
     }
   }
   createGrid(plan) {
+    // строки лучше преобразовывать в массивы с помощью метода split
+    // так сразу видно, что работа идёт со строкой
     return plan.map(stArr => [...stArr]).map(stLine => stLine.map(stChar => this.obstacleFromSymbol(stChar)));
   }
   createActors(plan) {
+    // если использовать reduce можно будет избавится от переменной result
     let result = [];
     plan.map((stArr) => [...stArr])
       .map((stLine, y) => stLine.map((stChar, x) => {
