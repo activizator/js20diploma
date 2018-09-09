@@ -65,14 +65,7 @@ class Level {
     this.actors = actors;
     this.grid = grid;
     this.height = this.grid.length;
-    // apply можно заменить на простой вызов функции с помощью средств ES6
-    let width = Math.max.apply(null, this.grid.map((row) => {
-      return row.length;
-    }));
-    // эту проверку можно будет убрать, если добавить 0
-    // в список аргументов Math.max
-    // (чтобы функция не возвращала -Infinity для пустого массива)
-    0 >= width ? this.width = 0 : this.width = width;
+    this.width = Math.max(0, ...(this.grid.map(row => row.length)));
     this.status = null;
     this.finishDelay = 1;
     this.player = this.actors.find(act => act.type === 'player');
@@ -116,18 +109,15 @@ class Level {
     }
   }
   noMoreActors(type) {
-    // здесь лучше использоваь другой метод массива,
-    // который проверяет наличие элементов, удовлетворяющих условию
-    return this.actors.findIndex(act => act.type === type) < 0 ? true : false;
+    return !this.actors.some((act) => act.type === type);
   }
   playerTouched(touchedEl, actor) {
     if (this.status !== null) {
       return;
     }
     if (touchedEl === 'lava' || touchedEl === 'fireball') {
-      // лучше сделать 2 строчки, чтобы было видно,
-      // что метод не возвращает ничего
-      return this.status = 'lost';
+      this.status = 'lost';
+      return;
     } 
     if (touchedEl === 'coin') {
       this.removeActor(actor);
@@ -154,25 +144,21 @@ class LevelParser {
     }
   }
   createGrid(plan) {
-    // строки лучше преобразовывать в массивы с помощью метода split
-    // так сразу видно, что работа идёт со строкой
-    return plan.map(stArr => [...stArr]).map(stLine => stLine.map(stChar => this.obstacleFromSymbol(stChar)));
+    return plan.map(stArr => stArr.split('')).map(stLine => stLine.map(stChar => this.obstacleFromSymbol(stChar)));
   }
   createActors(plan) {
-    // если использовать reduce можно будет избавится от переменной result
-    let result = [];
-    plan.map((stArr) => [...stArr])
-      .map((stLine, y) => stLine.map((stChar, x) => {
-        console.log(y);
-        const constr = this.actorFromSymbol(stChar);
-        if (typeof constr === 'function') {
-          const actor = new constr(new Vector(x, y));
+    return plan.reduce((res, stLine, y) => {
+      stLine.split('').forEach((stChar, x) => {
+        const constructor = this.actorFromSymbol(stChar);
+        if (typeof constructor === 'function') {
+          const actor = new constructor(new Vector(x, y));
           if (actor instanceof Actor) {
-            result.push(actor);
+            res.push(actor);
           }
         }
-    }));
-    return result;
+      });
+      return res;
+    },[]);
   }
   parse(plan) {
     return new Level(this.createGrid(plan), this.createActors(plan));
