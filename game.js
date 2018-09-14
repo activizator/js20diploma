@@ -62,10 +62,10 @@ class Actor {
 
 class Level {
   constructor(grid = [], actors = []) {
-    this.actors = actors;
-    this.grid = grid;
+    this.actors = actors.slice();
+    this.grid = grid.slice();
     this.height = this.grid.length;
-    this.width = Math.max(0, ...(this.grid.map(row => row.length)));
+    this.width = Math.max(0, ...this.grid.map(row => row.length));
     this.status = null;
     this.finishDelay = 1;
     this.player = this.actors.find(act => act.type === 'player');
